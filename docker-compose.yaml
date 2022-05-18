@@ -1,0 +1,43 @@
+services:
+
+  django-app:
+    build: fastr_project
+    restart: always
+    environment:
+      - POSTGRES_DB=fastr_db
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - smtp-server
+    command: bash -c '
+      python manage.py makemigrations && 
+      python manage.py migrate && 
+      python manage.py runserver 0.0.0.0:8000'
+
+  db:
+    image: postgres:alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=fastr_db
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  smtp-server:
+    image: mailhog/mailhog
+    restart: always
+    logging:
+      driver: 'none'
+    expose:
+      - '1025'
+    ports:
+      - 8025:8025
+
+volumes:
+  postgres_data:
