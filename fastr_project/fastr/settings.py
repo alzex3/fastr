@@ -20,6 +20,8 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     ACCESS_TOKEN_LIFETIME=(int, 1),
     REFRESH_TOKEN_LIFETIME=(int, 1),
+    CELERY_BROKER_URL=(str, 'redis://redis:6379/0'),
+    ELERY_RESULT_BACKEND=(str, 'redis://redis:6379/1'),
 )
 
 SITE_NAME = 'FASTRetail'
@@ -159,7 +161,7 @@ REST_FRAMEWORK = {
 }
 
 # drf-spectacular - OpenAPI schema generation for Django REST framework
-# https://drf-spectacular.readthedocs.io/en/latest/index.html
+# https://drf-spectacular.readthedocs.io/en/latest/settings.html
 
 SPECTACULAR_SETTINGS = {
     'TITLE': SITE_NAME,
@@ -191,3 +193,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=env('ACCESS_TOKEN_LIFETIME')),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=env('REFRESH_TOKEN_LIFETIME')),
 }
+
+# Celery - distributed system module settings
+# Run on Windows: celery -A fastr worker --loglevel=INFO --pool=solo
+# https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-celery-with-django
+CELERY_BROKER_URL = env('CELERY_BROKER')
+CELERY_RESULT_BACKEND = env('CELERY_BACKEND')

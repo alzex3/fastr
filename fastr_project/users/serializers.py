@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -5,10 +6,9 @@ from rest_framework import serializers
 
 from dj_rest_auth.serializers import PasswordResetSerializer
 
-from fastr import settings
 from api.models import Cart
 from users.models import User
-from users.signals import user_registered
+from users.tasks import user_registered_notification
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
@@ -38,7 +38,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
         if user_type == 'staff':
             raise DjangoValidationError(
-                'Failed! Register new users through requests is restricted!'
+                'Failed! Register staff users through requests is restricted!'
             )
 
         errors = dict()
@@ -57,7 +57,8 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         if user.type == 'buyer':
             Cart.objects.create(user=user)
 
-        user_registered.send(sender=self.__class__, user=user)
+        user_registered_notification.delay(user.id)
+
         return user
 
     class Meta:

@@ -6,6 +6,10 @@ from api.models import (
     Category, Attribute, Shop, ShippingNote, Product, Order,
     ProductAttribute, CartProduct, Cart, OrderProduct, OrderShop
 )
+from api.tasks import (
+    order_created_notification, order_received_notification,
+    order_updated_notification
+)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -224,6 +228,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         return data
 
+    def create(self, validated_data):
+        created_order = super().create(validated_data)
+
+        order_created_notification.delay(created_order.id)
+        order_received_notification.delay(created_order.id)
+
+        return created_order
+
 
 class OrderRetrievePositionsSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
@@ -290,3 +302,10 @@ class OrderShopRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderShop
         fields = ('order', 'status')
+
+    def update(self, order_shop, validated_data):
+        updated_order_shop = super().update(order_shop, validated_data)
+
+        order_updated_notification.delay(updated_order_shop.id)
+
+        return updated_order_shop

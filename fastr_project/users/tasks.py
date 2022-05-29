@@ -1,12 +1,14 @@
 from django.core.mail import EmailMessage
-from django.dispatch import Signal, receiver
+
+from celery import shared_task
+
+from users.models import User
 
 
-user_registered = Signal()
+@shared_task
+def user_registered_notification(user_id):
 
-
-@receiver(user_registered)
-def user_registered_notification(user, **kwargs):
+    user = User.objects.get(id=user_id)
 
     msg_body = f"""
     Hello, {user.get_short_name()}!

@@ -8,6 +8,7 @@ services:
     ports:
       - 8000:8000
     depends_on:
+      - redis
       - db
       - smtp-server
     command: bash -c '
@@ -22,13 +23,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+
+  celery:
+    build: fastr_project
+    restart: always
+    command: celery -A fastr worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - django-app
+      - postgres
+      - redis
+      - smtp 
+
+  redis:
+    image: redis 
+
   smtp-server:
     image: mailhog/mailhog
     restart: always
     logging:
       driver: 'none'
-    expose:
-      - '1025'
     ports:
       - 8025:8025
 
