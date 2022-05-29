@@ -59,6 +59,3 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
-# Mypy
-.mypy_cache/

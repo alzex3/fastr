@@ -1,4 +1,4 @@
-![](docs/logo.png)
+![](docs/fastr_logo.png)
 
 ## 1. FASTRetail  
 FASTRetail - REST API сервис для автоматизации оптовых закупок B2B пользователей.
