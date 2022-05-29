@@ -1,5 +1,3 @@
-import os
-
 """
 Django settings for fastr project.
 
@@ -14,18 +12,33 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+import environ
+
+
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    ACCESS_TOKEN_LIFETIME=(int, 1),
+    REFRESH_TOKEN_LIFETIME=(int, 1),
+)
+
+SITE_NAME = 'FASTRetail'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Take environment variables from .env file
+env.read_env(BASE_DIR.parent / '.env')
 
 # Quick-start development settings - unsuitable for production!
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qyjjit^0q0_#)vsnmgmwfyxguh8@@(og+t$z1_emx%n6wmd&_7'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = env('DEBUG')
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 # Application definition
 
@@ -40,7 +53,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    'dj_rest_auth',
+    'drf_spectacular',
 
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
@@ -82,16 +95,7 @@ AUTH_USER_MODEL = 'users.User'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'db',
-        'PORT': 5432,
-    }
-}
+DATABASES = {'default': env.db()}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -132,6 +136,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email SMTP server settings
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+
 # Django REST framework settings
 # https://www.django-rest-framework.org/api-guide/settings/
 
@@ -146,12 +155,23 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# Email SMTP server settings
-DEFAULT_FROM_EMAIL = 'AdvertsAPI <adverts_info@testapi.com>'
-EMAIL_HOST = 'smtp-server'
-EMAIL_PORT = '1025'
+# drf-spectacular - OpenAPI schema generation for Django REST framework
+# https://drf-spectacular.readthedocs.io/en/latest/index.html
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': SITE_NAME,
+    'DESCRIPTION': 'REST API service for automating purchases and sales of B2B customers.',
+    'VERSION': '1.0.0',
+    'CONTACT': {'name': 'Zharinov Alexey'},
+    'EXTERNAL_DOCS': {'url': 'https://github.com/alzex3/fastr'},
+    'SERVERS': [{'url': 'http://127.0.0.1:8000/'}],
+
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': '/api/v[0-9]',
+}
 
 # dj-rest-auth - authentication endpoints module settings
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html#configuration
@@ -161,15 +181,13 @@ REST_AUTH_SERIALIZERS = {
     'PASSWORD_RESET_SERIALIZER': 'users.serializers.CustomPasswordResetSerializer',
 }
 REST_USE_JWT = True
+REST_SESSION_LOGIN = False
 OLD_PASSWORD_FIELD_ENABLED = True
 
 # Simple JWT - token authentication module settings
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#settings
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=env('ACCESS_TOKEN_LIFETIME')),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=env('REFRESH_TOKEN_LIFETIME')),
 }
-
-# Project settings
-SITE_NAME = 'FASTRetail'

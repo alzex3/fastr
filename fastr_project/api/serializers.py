@@ -2,8 +2,10 @@ from django.db.models import Sum
 
 from rest_framework import serializers
 
-from api.models import Category, Attribute, Shop, ShippingNote, Product, Order, ProductAttribute, CartProduct, Cart, \
-    OrderProduct, OrderShop
+from api.models import (
+    Category, Attribute, Shop, ShippingNote, Product, Order,
+    ProductAttribute, CartProduct, Cart, OrderProduct, OrderShop
+)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -189,7 +191,7 @@ class CartRetrieveSerializer(serializers.ModelSerializer):
         fields = ('positions', 'total_sum')
 
     @staticmethod
-    def get_total_sum(obj):
+    def get_total_sum(obj: Cart) -> float:
         total_sum = obj.cart_products.aggregate(Sum('sum'))['sum__sum']
         if total_sum:
             return total_sum
@@ -204,13 +206,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ('order', 'shipping_note')
 
     def validate(self, data):
+        user = self.context['request'].user
         cart = self.context['request'].user.cart
 
         cart_products = CartProduct.objects.filter(cart=cart)
-
         if not cart_products:
             raise serializers.ValidationError(
                 f'Failed! You do not have any positions in cart!'
+            )
+
+        shipping_note = data.get('shipping_note')
+        user_shipping_note_exist = ShippingNote.objects.filter(id=shipping_note.id, user=user).exists()
+        if not user_shipping_note_exist:
+            raise serializers.ValidationError(
+                f'Failed! You do not have shipping note with that id!'
             )
 
         return data
@@ -247,7 +256,7 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
         fields = ('order', 'positions', 'statuses', 'shipping_note', 'total_sum', 'created_at')
 
     @staticmethod
-    def get_total_sum(obj):
+    def get_total_sum(obj: Order) -> float:
         return obj.order_products.aggregate(Sum('sum'))['sum__sum']
 
 
@@ -271,7 +280,7 @@ class OrderShopRetrieveOrderSerializer(serializers.ModelSerializer):
         fields = ('id', 'positions', 'shipping_note', 'total_sum', 'created_at')
 
     @staticmethod
-    def get_total_sum(obj):
+    def get_total_sum(obj: Order) -> float:
         return obj.order_products.aggregate(Sum('sum'))['sum__sum']
 
 

@@ -9,10 +9,16 @@ from rest_framework import viewsets, status, mixins
 
 from api import serializers
 from api.permissions import IsBuyer, IsSeller, IsSellerHasShop, IsSellerHasNoShop
-from api.models import Category, Attribute, Shop, ShippingNote, Product, Order, CartProduct, OrderShop, OrderProduct
+from api.models import (
+    Category, Attribute, Shop, Order, Product,
+    ShippingNote, CartProduct, OrderShop, OrderProduct
+)
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Retrieves product categories. It is not possible to create categories by user request.
+    """
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
     permission_classes = (AllowAny,)
@@ -24,6 +30,9 @@ class ShippingNoteViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """
+    Creates and retrieves shipping notes. For buyers only.
+    """
     serializer_class = serializers.ShippingNoteSerializer
     permission_classes = (IsBuyer,)
 
@@ -40,6 +49,9 @@ class AttributeViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """
+    Creates and retrieves product attributes. For sellers only.
+    """
     queryset = Attribute.objects.all()
     serializer_class = serializers.AttributeSerializer
     permission_classes = (IsSeller,)
@@ -47,13 +59,17 @@ class AttributeViewSet(
 
 class ProductCreateViewSet(
     mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """
+    Creates, retrieves and updates selling products. For sellers only. Seller must have shop.
+    """
     serializer_class = serializers.ProductCreateSerializer
     permission_classes = (IsSeller, IsSellerHasShop)
+    queryset = Product.objects.all()
 
     def get_queryset(self):
         return Product.objects.filter(shop=self.request.user.shop)
@@ -63,6 +79,9 @@ class ProductCreateViewSet(
 
 
 class ProductRetrieveViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Retrieves selling products from open shops.
+    """
     queryset = Product.objects.filter(shop__is_open=True)
     serializer_class = serializers.ProductRetrieveSerializer
     permission_classes = (AllowAny,)
@@ -76,6 +95,9 @@ class ShopCreateView(
     mixins.UpdateModelMixin,
     GenericAPIView,
 ):
+    """
+    Creates, retrieves and updates shop. For sellers only.
+    """
     serializer_class = serializers.ShopCreateSerializer
 
     def get_permissions(self):
@@ -103,6 +125,9 @@ class ShopCreateView(
 
 
 class ShopRetrieveViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Retrieves open shops.
+    """
     queryset = Shop.objects.filter(is_open=True)
     serializer_class = serializers.ShopRetrieveSerializer
     permission_classes = (AllowAny,)
@@ -110,13 +135,18 @@ class ShopRetrieveViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('name',)
 
 
-class CartView(
-    mixins.CreateModelMixin,
+class CartProductView(
     mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     GenericAPIView,
 ):
+    """
+    Creates, retrieves, updates and deletes cart positions. For buyers only.
+    """
     permission_classes = (IsBuyer,)
+    serializer_class = serializers.CartProductCreateSerializer
 
     def get_object(self):
         return self.request.user.cart
@@ -166,6 +196,10 @@ class OrderViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """
+    Creates and retrieve orders. For buyers only.
+    """
+    queryset = Order.objects.all()
     permission_classes = (IsBuyer,)
 
     def get_queryset(self):
@@ -186,6 +220,10 @@ class OrderShopViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """
+    Creates and retrieve orders. Updates order status. For sellers only. Seller must have shop.
+    """
+    queryset = OrderShop.objects.all()
     serializer_class = serializers.OrderShopRetrieveSerializer
     lookup_field = 'order'
     permission_classes = (IsSeller, IsSellerHasShop)

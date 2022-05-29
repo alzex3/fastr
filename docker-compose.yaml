@@ -3,11 +3,8 @@ services:
   django-app:
     build: fastr_project
     restart: always
-    environment:
-      - POSTGRES_DB=fastr_db
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - .env
     ports:
       - 8000:8000
     depends_on:
@@ -23,12 +20,8 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=fastr_db
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-
+    env_file:
+      - .env
   smtp-server:
     image: mailhog/mailhog
     restart: always

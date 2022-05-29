@@ -1,12 +1,14 @@
-from rest_framework import mixins
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 
 from .models import User
 from .serializers import RegisterUserSerializer
 
 
-class UserCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
+class UserCreateView(CreateAPIView):
+    """
+    Creates new user.
+    """
     queryset = User.objects.all()
     serializer_class = RegisterUserSerializer
     permission_classes = (AllowAny,)
