@@ -7,8 +7,8 @@ from api.models import (
     ProductAttribute, CartProduct, Cart, OrderProduct, OrderShop
 )
 from api.tasks import (
-    order_created_notification, order_received_notification,
-    order_updated_notification
+    order_created_email, order_received_email,
+    order_updated_email
 )
 
 
@@ -231,8 +231,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         created_order = super().create(validated_data)
 
-        order_created_notification.delay(created_order.id)
-        order_received_notification.delay(created_order.id)
+        order_created_email.delay(created_order.id)
+        order_received_email.delay(created_order.id)
 
         return created_order
 
@@ -306,6 +306,6 @@ class OrderShopRetrieveSerializer(serializers.ModelSerializer):
     def update(self, order_shop, validated_data):
         updated_order_shop = super().update(order_shop, validated_data)
 
-        order_updated_notification.delay(updated_order_shop.id)
+        order_updated_email.delay(updated_order_shop.id)
 
         return updated_order_shop

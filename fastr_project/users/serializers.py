@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -8,19 +8,31 @@ from dj_rest_auth.serializers import PasswordResetSerializer
 
 from api.models import Cart
 from users.models import User
-from users.tasks import user_registered_notification
+from users.tasks import user_registered_email, user_password_reset_email
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+
+        user_password_reset_email.delay(
+            user_id=context.get('user').id,
+            uid=context.get('uid'),
+            token=context.get('token'),
+        )
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
-    def get_email_options(self):
-        extra_context = {
-            'site_name': settings.SITE_NAME,
-        }
-
-        return {
-            'email_template_name': 'password_reset_message.txt',
-            'extra_email_context': extra_context,
-        }
+    @property
+    def password_reset_form_class(self):
+        return CustomPasswordResetForm
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,7 +69,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         if user.type == 'buyer':
             Cart.objects.create(user=user)
 
-        user_registered_notification.delay(user.id)
+        user_registered_email.delay(user.id)
 
         return user
 

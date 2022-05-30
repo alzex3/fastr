@@ -24,8 +24,6 @@ env = environ.Env(
     ELERY_RESULT_BACKEND=(str, 'redis://redis:6379/1'),
 )
 
-SITE_NAME = 'FASTRetail'
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -164,7 +162,7 @@ REST_FRAMEWORK = {
 # https://drf-spectacular.readthedocs.io/en/latest/settings.html
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': SITE_NAME,
+    'TITLE': 'FASTR',
     'DESCRIPTION': 'REST API service for automating purchases and sales of B2B customers.',
     'VERSION': '1.0.0',
     'CONTACT': {'name': 'Zharinov Alexey'},
