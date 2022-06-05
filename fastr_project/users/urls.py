@@ -11,6 +11,8 @@ from dj_rest_auth.views import (
 from users.views import UserCreateView
 
 
+app_name = 'users'
+
 urlpatterns = [
 
     # URLs that require token auth

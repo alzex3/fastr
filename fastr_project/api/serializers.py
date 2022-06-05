@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django.conf import settings
 
 from rest_framework import serializers
 
@@ -38,17 +39,16 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'shop')
 
 
-class ProductAttributesSerializer(serializers.ModelSerializer):
+class ProductCreateAttributesSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Attribute.objects.all(), source='attribute')
-    name = serializers.StringRelatedField(source='attribute.name')
 
     class Meta:
         model = ProductAttribute
-        fields = ('id', 'name', 'value')
+        fields = ('id', 'value')
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
-    product_attributes = ProductAttributesSerializer(many=True)
+    product_attributes = ProductCreateAttributesSerializer(many=True)
 
     class Meta:
         model = Product
@@ -97,10 +97,19 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         return updated_product
 
 
+class ProductRetrieveAttributesSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(queryset=Attribute.objects.all(), source='attribute')
+    name = serializers.StringRelatedField(source='attribute.name')
+
+    class Meta:
+        model = ProductAttribute
+        fields = ('id', 'name', 'value')
+
+
 class ProductRetrieveSerializer(serializers.ModelSerializer):
     shop = serializers.StringRelatedField()
     category = serializers.StringRelatedField()
-    product_attributes = ProductAttributesSerializer(many=True)
+    product_attributes = ProductRetrieveAttributesSerializer(many=True)
 
     class Meta:
         model = Product
@@ -231,8 +240,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         created_order = super().create(validated_data)
 
-        order_created_email.delay(created_order.id)
-        order_received_email.delay(created_order.id)
+        if settings.EMAIL_ORDER_NOTIFICATIONS:
+            order_created_email.delay(created_order.id)
+            order_received_email.delay(created_order.id)
 
         return created_order
 
@@ -306,6 +316,7 @@ class OrderShopRetrieveSerializer(serializers.ModelSerializer):
     def update(self, order_shop, validated_data):
         updated_order_shop = super().update(order_shop, validated_data)
 
-        order_updated_email.delay(updated_order_shop.id)
+        if settings.EMAIL_ORDER_NOTIFICATIONS:
+            order_updated_email.delay(updated_order_shop.id)
 
         return updated_order_shop

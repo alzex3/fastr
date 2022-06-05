@@ -1,6 +1,8 @@
 static/
 .venv/
 .idea/
-**/__pycache__
+__pycache__/
 .git/
 .gitignore
+.coverage
+.pytest_cache

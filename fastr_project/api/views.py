@@ -67,9 +67,9 @@ class ProductCreateViewSet(
     """
     Creates, retrieves and updates selling products. For sellers only. Seller must have shop.
     """
+    queryset = Product.objects.all()
     serializer_class = serializers.ProductCreateSerializer
     permission_classes = (IsSeller, IsSellerHasShop)
-    queryset = Product.objects.all()
 
     def get_queryset(self):
         return Product.objects.filter(shop=self.request.user.shop)

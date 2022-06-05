@@ -1,7 +1,6 @@
 from django.db import models
 from django.core import validators
 from django.db.models import F, Sum
-from django.core.validators import MinValueValidator
 
 from users.models import User
 
@@ -102,17 +101,24 @@ class Product(models.Model):
         verbose_name='Attributes',
         related_name='products',
         through='ProductAttribute',
-
     )
     sku = models.CharField(max_length=25, verbose_name='SKU')
     name = models.CharField(max_length=150, verbose_name='Name')
     description = models.CharField(max_length=500, verbose_name='Description')
-    stock_quantity = models.PositiveIntegerField(verbose_name='Stock quantity')
+    stock_quantity = models.PositiveSmallIntegerField(
+        verbose_name='Stock quantity',
+        validators=[
+            validators.MinValueValidator(1),
+            validators.MaxValueValidator(32000)],
+    )
     price = models.DecimalField(
-        max_digits=18,
+        verbose_name='Sold price',
+        max_digits=10,
         decimal_places=2,
-        validators=[validators.MinValueValidator(1)],
-        verbose_name='Price',
+        validators=[
+            validators.MinValueValidator(1),
+            validators.MaxValueValidator(99999999),
+        ],
     )
     created_at = models.DateTimeField(verbose_name='Created date', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='Update date', auto_now=True)
@@ -193,9 +199,11 @@ class CartProduct(models.Model):
         related_name='cart_products',
         on_delete=models.CASCADE,
     )
-    quantity = models.PositiveIntegerField(
+    quantity = models.PositiveSmallIntegerField(
         verbose_name='Quantity',
-        validators=[MinValueValidator(1)],
+        validators=[
+            validators.MinValueValidator(1),
+            validators.MaxValueValidator(999)],
     )
     objects = CartProductManager()
 
@@ -312,15 +320,13 @@ class OrderProduct(models.Model):
         related_name='order_products',
         on_delete=models.CASCADE,
     )
-    quantity = models.PositiveIntegerField(
+    quantity = models.PositiveSmallIntegerField(
         verbose_name='Quantity',
-        validators=[MinValueValidator(1)],
     )
     sold_price = models.DecimalField(
         verbose_name='Sold price',
-        max_digits=18,
+        max_digits=10,
         decimal_places=2,
-        validators=[validators.MinValueValidator(1)],
     )
     objects = OrderProductManager()
 

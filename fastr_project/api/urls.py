@@ -9,11 +9,13 @@ from api.views import (
 )
 
 
+app_name = 'api'
+
 router = DefaultRouter()
-router.register('categories', CategoryViewSet)
-router.register('attributes', AttributeViewSet)
-router.register('products', ProductRetrieveViewSet)
-router.register('shops', ShopRetrieveViewSet)
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('attributes', AttributeViewSet, basename='attributes')
+router.register('products', ProductRetrieveViewSet, basename='products')
+router.register('shops', ShopRetrieveViewSet, basename='shops')
 
 seller_router = DefaultRouter()
 seller_router.register('orders', OrderShopViewSet, basename='seller-orders')
@@ -29,9 +31,9 @@ urlpatterns = [
     path('v1/', include(router.urls)),
 
     path('v1/seller/', include(seller_router.urls)),
-    path('v1/seller/shop/', ShopCreateView.as_view()),
+    path('v1/seller/shop/', ShopCreateView.as_view(), name='seller-shop'),
 
     path('v1/buyer/', include(buyer_router.urls)),
-    path('v1/buyer/cart/', CartProductView.as_view()),
+    path('v1/buyer/cart/', CartProductView.as_view(), name='buyer-cart'),
 
 ]

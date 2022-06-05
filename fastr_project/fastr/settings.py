@@ -22,6 +22,8 @@ env = environ.Env(
     REFRESH_TOKEN_LIFETIME=(int, 1),
     CELERY_BROKER_URL=(str, 'redis://redis:6379/0'),
     ELERY_RESULT_BACKEND=(str, 'redis://redis:6379/1'),
+    EMAIL_ORDER_NOTIFICATIONS=(bool, False),
+    THROTTLING=(bool, True),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,7 +76,7 @@ ROOT_URLCONF = 'fastr.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,6 +143,9 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
 
+# Email notifications settings
+EMAIL_ORDER_NOTIFICATIONS = env('EMAIL_ORDER_NOTIFICATIONS')
+
 # Django REST framework settings
 # https://www.django-rest-framework.org/api-guide/settings/
 
@@ -156,7 +161,22 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
+
+if env('THROTTLING'):
+    REST_FRAMEWORK.update(
+        DEFAULT_THROTTLE_CLASSES=[
+            'rest_framework.throttling.AnonRateThrottle',
+            'rest_framework.throttling.UserRateThrottle',
+        ],
+        DEFAULT_THROTTLE_RATES={
+            'dj_rest_auth': '10/day',
+            'anon': '100/day',
+            'user': '1000/day',
+        },
+    )
+
 
 # drf-spectacular - OpenAPI schema generation for Django REST framework
 # https://drf-spectacular.readthedocs.io/en/latest/settings.html
@@ -168,7 +188,6 @@ SPECTACULAR_SETTINGS = {
     'CONTACT': {'name': 'Zharinov Alexey'},
     'EXTERNAL_DOCS': {'url': 'https://github.com/alzex3/fastr'},
     'SERVERS': [{'url': 'http://127.0.0.1:8000/'}],
-
     'SERVE_INCLUDE_SCHEMA': False,
     'SCHEMA_PATH_PREFIX': '/api/v[0-9]',
 }

@@ -1,0 +1,8 @@
+[run]
+branch = True
+omit =
+    *tests*
+    *migrations*
+
+[coverage:report]
+skip_empty = true
