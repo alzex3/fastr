@@ -187,8 +187,8 @@ class CartProductCreateSerializer(serializers.ModelSerializer):
 
 class CartRetrievePositionsSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
-    price = serializers.FloatField(source='product.price')
-    sum = serializers.FloatField()
+    price = serializers.CharField(source='product.price')
+    sum = serializers.CharField()
 
     class Meta:
         model = CartProduct
@@ -204,11 +204,11 @@ class CartRetrieveSerializer(serializers.ModelSerializer):
         fields = ('positions', 'total_sum')
 
     @staticmethod
-    def get_total_sum(obj: Cart) -> float:
+    def get_total_sum(obj: Cart) -> str:
         total_sum = obj.cart_products.aggregate(Sum('sum'))['sum__sum']
         if total_sum:
-            return total_sum
-        return 0
+            return str(total_sum)
+        return '0'
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -249,8 +249,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
 class OrderRetrievePositionsSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
-    sold_price = serializers.FloatField()
-    sum = serializers.FloatField(read_only=True)
+    sold_price = serializers.CharField
+    sum = serializers.CharField(read_only=True)
 
     class Meta:
         model = OrderProduct
@@ -278,13 +278,13 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
         fields = ('order', 'positions', 'statuses', 'shipping_note', 'total_sum', 'created_at')
 
     @staticmethod
-    def get_total_sum(obj: Order) -> float:
-        return obj.order_products.aggregate(Sum('sum'))['sum__sum']
+    def get_total_sum(obj: Order) -> str:
+        return str(obj.order_products.aggregate(Sum('sum'))['sum__sum'])
 
 
 class OrderShopRetrieveOrderPositionsSerializer(serializers.ModelSerializer):
-    sold_price = serializers.FloatField()
-    sum = serializers.FloatField(read_only=True)
+    sold_price = serializers.CharField()
+    sum = serializers.CharField(read_only=True)
 
     class Meta:
         model = OrderProduct
@@ -302,8 +302,8 @@ class OrderShopRetrieveOrderSerializer(serializers.ModelSerializer):
         fields = ('id', 'positions', 'shipping_note', 'total_sum', 'created_at')
 
     @staticmethod
-    def get_total_sum(obj: Order) -> float:
-        return obj.order_products.aggregate(Sum('sum'))['sum__sum']
+    def get_total_sum(obj: Order) -> str:
+        return str(obj.order_products.aggregate(Sum('sum'))['sum__sum'])
 
 
 class OrderShopRetrieveSerializer(serializers.ModelSerializer):
