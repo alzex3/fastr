@@ -1,0 +1,15 @@
+[MASTER]
+disable=
+    C0114,
+    C0115,
+    C0116,
+
+# commandline arguments:
+--output-format=colorized
+--load-plugins
+pylint_django
+--django-settings-module=fastr.settings
+$FilePath$
+
+# project directory:
+$ProjectFileDir$

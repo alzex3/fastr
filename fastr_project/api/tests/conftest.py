@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from model_bakery import baker
 
-from api.models import Cart, ShippingNote
+from api.models import Cart
 
 
 @pytest.fixture

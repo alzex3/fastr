@@ -225,14 +225,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         cart_products = CartProduct.objects.filter(cart=cart)
         if not cart_products:
             raise serializers.ValidationError(
-                f'Failed! You do not have any positions in cart!'
+                'Failed! You do not have any positions in cart!'
             )
 
         shipping_note = data.get('shipping_note')
         user_shipping_note_exist = ShippingNote.objects.filter(id=shipping_note.id, user=user).exists()
         if not user_shipping_note_exist:
             raise serializers.ValidationError(
-                f'Failed! You do not have shipping note with that id!'
+                'Failed! You do not have shipping note with that id!'
             )
 
         return data

@@ -53,11 +53,11 @@ class RegisterUserSerializer(serializers.ModelSerializer):
                 'Failed! Register staff users through requests is restricted!'
             )
 
-        errors = dict()
+        errors = {}
         try:
             validate_password(password=password, user=user)
-        except DjangoValidationError as e:
-            errors['password'] = list(e.messages)
+        except DjangoValidationError as error:
+            errors['password'] = list(error.messages)
         if errors:
             raise DjangoValidationError(errors)
 

@@ -1,5 +1,5 @@
-import pytest
 import random
+import pytest
 
 from django.urls import reverse
 
@@ -75,7 +75,9 @@ class TestShippingNoteView:
 
     def test_shipping_notes_list(self, buyer_user, buyer_client, model_create):
         shipping_notes = model_create(ShippingNote, user=buyer_user, _quantity=3)
-        shipping_notes_attrs = [self._shipping_note_dict(shipping_note) for shipping_note in shipping_notes]
+        shipping_notes_attrs = [
+            self._shipping_note_dict(shipping_note) for shipping_note in shipping_notes
+        ]
 
         url = reverse('api:buyer-shipping-notes-list')
         resp = buyer_client.get(url)
@@ -113,7 +115,9 @@ class TestAttributeViewSet:
 
     def test_attributes_list(self, seller_client, model_create):
         attributes = model_create(Attribute, _quantity=3)
-        attributes_attrs = [{'id': attribute.id, 'name': attribute.name} for attribute in attributes]
+        attributes_attrs = [
+            {'id': attribute.id, 'name': attribute.name} for attribute in attributes
+        ]
 
         url = reverse('api:attributes-list')
         resp = seller_client.get(url)
@@ -383,7 +387,12 @@ class TestCartProductView:
             assert CartProduct.objects.get(cart=buyer_user.cart, **cart_product_attr)
 
     def test_cart_product_update(self, buyer_user, buyer_client, model_create):
-        cart_products = model_create(CartProduct, cart=buyer_user.cart, product__stock_quantity=1000, _quantity=3)
+        cart_products = model_create(
+            CartProduct,
+            cart=buyer_user.cart,
+            product__stock_quantity=1000,
+            _quantity=3
+        )
         update_cart_products_attrs = [
             {'product': cart_product.product.id, 'quantity': random.randint(1, 999)}
             for cart_product in cart_products
@@ -467,7 +476,7 @@ class TestOrderViewSet:
         }
         return order_shop_dict
 
-    def test_order_create(self, buyer_user, buyer_client, model_create, model_prepare, settings):
+    def test_order_create(self, buyer_user, buyer_client, model_create, settings):
         set_cart_products = model_create(CartProduct, cart=buyer_user.cart, _quantity=3)
         set_shipping_note = model_create(ShippingNote, user=buyer_user)
         order_attrs = {'shipping_note': set_shipping_note.id}
@@ -587,6 +596,7 @@ class TestOrderShopViewSet:
         set_shop = model_create(Shop, user=seller_user)
         set_products = model_create(Product, shop=set_shop, _quantity=3)
         self._set_cart_products(set_products, buyer_user, model_create)
+
         settings.EMAIL_ORDER_NOTIFICATIONS = False
 
         order = model_create(Order, user=buyer_user)
@@ -610,7 +620,7 @@ class TestOrderShopViewSet:
         set_shop = model_create(Shop, user=seller_user)
 
         orders_shop_attrs = []
-        for i in range(3):
+        for _ in range(3):
             set_products = model_create(Product, shop=set_shop, _quantity=3)
             self._set_cart_products(set_products, buyer_user, model_create)
             order = model_create(Order, user=buyer_user)

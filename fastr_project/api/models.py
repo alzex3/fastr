@@ -23,7 +23,7 @@ class Category(models.Model):
         verbose_name_plural = 'Сategories'
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Attribute(models.Model):
@@ -34,7 +34,7 @@ class Attribute(models.Model):
         verbose_name_plural = 'Attributes'
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Shop(models.Model):
@@ -53,7 +53,7 @@ class Shop(models.Model):
     is_open = models.BooleanField(verbose_name='Shop open', default=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     class Meta:
         verbose_name = 'Shop'
@@ -181,7 +181,7 @@ class Cart(models.Model):
 
 class CartProductManager(models.Manager):
     def get_queryset(self):
-        return super(CartProductManager, self).get_queryset().annotate(
+        return super().get_queryset().annotate(
             sum=Sum(F('quantity') * F('product__price'))
         )
 
@@ -263,8 +263,8 @@ class Order(models.Model):
 
         cart_products.delete()
 
-        unic_order_shops = set(order_shops)
-        for shop in unic_order_shops:
+        unique_order_shops = set(order_shops)
+        for shop in unique_order_shops:
             OrderShop.objects.create(
                 order=self,
                 shop=shop,
@@ -302,7 +302,7 @@ class OrderShop(models.Model):
 
 class OrderProductManager(models.Manager):
     def get_queryset(self):
-        return super(OrderProductManager, self).get_queryset().annotate(
+        return super().get_queryset().annotate(
             sum=Sum(F('quantity') * F('sold_price'))
         )
 

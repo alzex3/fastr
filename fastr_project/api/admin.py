@@ -1,7 +1,12 @@
 from django.contrib import admin
 
-from api.models import Shop, Category, Product, Attribute, ShippingNote, ProductAttribute, Order, OrderShop, Cart, \
-    CartProduct, OrderProduct
+from api.models import (
+    Shop, Category, Product,
+    Attribute, ShippingNote,
+    ProductAttribute, Order,
+    OrderShop, Cart, CartProduct,
+    OrderProduct,
+)
 
 
 @admin.register(Category)

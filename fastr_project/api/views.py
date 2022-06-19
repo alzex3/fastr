@@ -106,7 +106,7 @@ class ShopCreateView(
         else:
             self.permission_classes = (IsSeller, IsSellerHasShop)
 
-        return super(ShopCreateView, self).get_permissions()
+        return super().get_permissions()
 
     def get_object(self):
         return self.request.user.shop

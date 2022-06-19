@@ -11,3 +11,6 @@ coverage==6.4.1
 pytest-django==4.5.2
 pytest-cov==3.0.0
 model-bakery==1.5.0
+pylint==2.14.1
+pylint-django==2.5.3
+pylint-celery==0.3
